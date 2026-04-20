@@ -554,4 +554,63 @@ a:hover {
     border-color: var(--primary);
 }
 
+.page-btn.disabled,
+.page-btn.disabled:hover {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background: var(--bg);
+    color: var(--muted);
+    border-color: var(--line);
+    pointer-events: none;
+}
 
+.page-numbers {
+    display: flex;
+    gap: 4px;
+}
+
+@media (max-width: 700px) {
+    .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .nav-user {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .page-header h1 {
+        font-size: 24px;
+    }
+}
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.charts-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.chart-col {
+    flex: 1;
+    min-width: 280px;
+}
+
+.chart-card {
+    padding: 16px;
+}
+
+.chart-title {
+    margin: 0 0 14px;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+}
