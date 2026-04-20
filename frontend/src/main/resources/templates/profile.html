@@ -130,23 +130,4 @@
             </tr>
             </thead>
             <tbody>
-            <tr th:each="log : ${recentActivity}">
-                <td th:text="${#temporals.format(log.calledAt, 'yyyy-MM-dd HH:mm:ss')}">2026-01-01</td>
-                <td class="endpoint-path" th:text="${log.endpoint}">/path</td>
-                <td th:text="${log.httpMethod}">GET</td>
-                <td>
-                    <span class="status-badge"
-                          th:classappend="${log.status == 'SUCCESS'} ? ' status-success' :
-                                          (${log.status == 'FAILED'} ? ' status-failed' : ' status-processing')"
-                          th:text="${log.status}">SUCCESS</span>
-                </td>
-            </tr>
-            <tr th:if="${#lists.isEmpty(recentActivity)}">
-                <td colspan="4" class="empty">No recent activity.</td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
-</div>
-</body>
-</html>
+           
