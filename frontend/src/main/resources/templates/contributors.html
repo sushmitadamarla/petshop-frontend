@@ -25,12 +25,6 @@
         <p class="subtitle">Team Contributors</p>
     </div>
 
-    <div class="container">
-    <div class="page-header">
-        <h1>Project: PetShop Management System</h1>
-        <p class="subtitle">Team Contributors</p>
-    </div>
-
     <div class="contributor-grid">
         <article class="card contributor-card" th:each="c : ${contributors}">
             <img class="avatar" th:src="@{${c.profilePicUrl}}" th:alt="${c.name}" onerror="this.src='https://ui-avatars.com/api/?name=Pet+Shop&background=1F7AE0&color=ffffff&size=120';this.onerror=null;">
@@ -43,4 +37,3 @@
 </div>
 </body>
 </html>
-
