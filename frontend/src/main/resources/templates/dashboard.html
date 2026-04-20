@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - PetShop Dev Portal</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <script th:src="@{/webjars/chartjs/3.9.1/dist/chart.min.js}"></script>
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-brand">&#128062; PetShop Dev Portal</div>
+    <div class="nav-user">
+        <div class="nav-links">
+            <a th:href="@{/contributors}">Contributors</a>
+            <a th:href="@{/dashboard}">Dashboard</a>
+        </div>
+        <span th:text="${session.loggedInUser.name}">User</span>
+        <a th:href="@{/logout}" class="btn-logout">Logout</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="page-header">
+        <h1>API Dashboard</h1>
+        <p class="subtitle">Live endpoint activity summary for the team.</p>
+    </div>
+
+    <section class="stats-grid">
+        <article class="card stat-card">
+            <p class="stat-label">Total Calls</p>
+            <p class="stat-value" th:text="${totalApiCalls}">0</p>
+        </article>
+        <article class="card stat-card">
+            <p class="stat-label">Successful</p>
+            <p class="stat-value" th:text="${successfulCalls}">0</p>
+        </article>
+        <article class="card stat-card">
+            <p class="stat-label">Failed</p>
+            <p class="stat-value" th:text="${failedCalls}">0</p>
+        </article>
+        <article class="card stat-card">
+            <p class="stat-label">Processing</p>
+            <p class="stat-value" th:text="${processingCalls}">0</p>
+</article>
+    </section>
+
+    <h2 class="section-title">API Analytics</h2>
+    <div class="charts-row">
+        <div class="chart-col">
+            <article class="card chart-card">
+                <h3 class="chart-title">Status Overview</h3>
+                <canvas id="statusChart"></canvas>
+            </article>
+        </div>
+        <div class="chart-col">
+            <article class="card chart-card">
+                <h3 class="chart-title">HTTP Methods</h3>
+                <canvas id="methodChart"></canvas>
+            </article>
+        </div>
+    </div>
+    <div class="charts-row">
+        <div class="chart-col">
+            <article class="card chart-card">
+                <h3 class="chart-title">Top Endpoints</h3>
+                <canvas id="topEndpointsChart"></canvas>
+            </article>
+        </div>
+        <div class="chart-col">
+            <article class="card chart-card">
+                <h3 class="chart-title">Calls by Contributor</h3>
+                <canvas id="contributorChart"></canvas>
+            </article>
+        </div>
+    </div>
+
+    <h2 class="section-title">Contributor Performance</h2>
+    <div class="card table-wrap">
+        <table class="data-table">
+<thead>
+            <tr>
+                <th>Contributor</th>
+                <th>Total Calls</th>
+                <th>Success</th>
+                <th>Failed</th>
+                <th>Success Rate</th>
+                <th>First Call</th>
+                <th>Last Call</th>
+            </tr>
+            </thead>
+            <tbody>
+<tr th:each="stat : ${contributorStats}">
+                <td th:text="${stat.contributor.name}">Name</td>
+                <td th:text="${stat.totalCalls}">0</td>
+                <td th:text="${stat.successCalls}">0</td>
+                <td th:text="${stat.failedCalls}">0</td>
+                <td th:text="${stat.successRate + '%'}">0%</td>
+                <td th:text="${stat.firstCall != null ? #temporals.format(stat.firstCall, 'yyyy-MM-dd HH:mm') : '-'}">-</td>
+                <td th:text="${stat.lastCall != null ? #temporals.format(stat.lastCall, 'yyyy-MM-dd HH:mm') : '-'}">-</td>
+            </tr>
+<tr th:if="${#lists.isEmpty(contributorStats)}">
+                <td colspan="7" class="empty">No activity yet.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h2 class="section-title">Recent API Activity</h2>
+
+    <div class="card">
+        <div class="contributor-tabs">
+            <a th:href="@{/dashboard(page=1)}"
+               class="tab-btn"
+               th:classappend="${selectedContributorId == null} ? ' active' : ''">All</a>
+            <a th:each="contributor : ${allContributors}"
+               th:href="@{/dashboard(page=1, contributorId=${contributor.id})}"
+               class="tab-btn"
+               th:classappend="${selectedContributorId != null and selectedContributorId == contributor.id} ? ' active' : ''"
+               th:text="${contributor.name}">Contributor</a>
+        </div>
+
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>Contributor</th>
+                    <th>Method</th>
+                    <th>Endpoint</th>
+                    <th>Status</th>
+                    <th>Status Code</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="log : ${recentActivity}">
+                    <td th:text="${#temporals.format(log.calledAt, 'yyyy-MM-dd HH:mm:ss')}">2026-01-01 10:00:00</td>
+                    <td th:text="${contributorNames.get(log.contributorId)}">Contributor</td>
+                    <td th:text="${log.httpMethod}">GET</td>
+                    <td class="endpoint-path" th:text="${log.endpoint}">/path</td>
+                    <td>
+                        <span class="status-badge"
+                              th:classappend="${log.status == 'SUCCESS'} ? ' status-success' : (${log.status == 'FAILED'} ? ' status-failed' : ' status-processing')"
+                              th:text="${log.status}">SUCCESS</span>
+                    </td>
+                    <td th:text="${log.statusCode}">200</td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(recentActivity)}">
+                    <td colspan="6" class="empty">No recent activity.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination" th:if="${totalPages > 0}">
+            <span class="pagination-info">
+                Showing <span th:text="${(currentPage - 1) * 10 + 1}">1</span> -
+                <span th:text="${currentPage * 10 < totalActivity ? currentPage * 10 : totalActivity}">10</span>
+                of <span th:text="${totalActivity}">100</span> entries
+            </span>
+            <div class="pagination-buttons">
+                <a th:href="@{/dashboard(page=1, contributorId=${selectedContributorId})}"
+                   class="page-btn" th:classappend="${currentPage == 1} ? ' disabled' : ''">First</a>
+                <a th:href="@{/dashboard(page=${currentPage - 1}, contributorId=${selectedContributorId})}"
+                   class="page-btn" th:classappend="${currentPage == 1} ? ' disabled' : ''">Prev</a>
+                <span class="page-numbers">
+                    <a th:each="i : ${#numbers.sequence(T(java.lang.Math).max(1, currentPage - 2), T(java.lang.Math).min(totalPages, currentPage + 2))}"
+                       th:href="@{/dashboard(page=${i}, contributorId=${selectedContributorId})}"
+                       class="page-num"
+                       th:classappend="${i == currentPage} ? ' active' : ''"
+                       th:text="${i}">1</a>
+                </span>
+                <a th:href="@{/dashboard(page=${currentPage + 1}, contributorId=${selectedContributorId})}"
+                   class="page-btn" th:classappend="${currentPage == totalPages} ? ' disabled' : ''">Next</a>
+                <a th:href="@{/dashboard(page=${totalPages}, contributorId=${selectedContributorId})}"
+                   class="page-btn" th:classappend="${currentPage == totalPages} ? ' disabled' : ''">Last</a>
+</div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    // Status Overview Chart (Pie)
+    const statusData = /*[[${statusDistribution}]]*/ {};
+    new Chart(document.getElementById('statusChart'), {
+        type: 'pie',
+        data: {
+            labels: Object.keys(statusData),
+            datasets: [{
+                data: Object.values(statusData),
+                backgroundColor: ['#22c55e', '#ef4444', '#f59e0b']
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { position: 'bottom' } }
+        }
+    });
+
+    // HTTP Methods Chart (Doughnut)
+    const methodData = /*[[${httpMethodDistribution}]]*/ {};
+    new Chart(document.getElementById('methodChart'), {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(methodData),
+            datasets: [{
+                data: Object.values(methodData),
+                backgroundColor: ['#3b82f6', '#8b5cf6', '#f59e0b', '#ec4899']
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { position: 'bottom' } }
+        }
+    });
+
+    // Top Endpoints Chart (Bar)
+    const topEndpoints = /*[[${topEndpoints}]]*/ [];
+    new Chart(document.getElementById('topEndpointsChart'), {
+        type: 'bar',
+        data: {
+            labels: topEndpoints.map(e => e.endpoint.substring(0, 20)),
+            datasets: [{
+                label: 'Calls',
+                data: topEndpoints.map(e => e.count),
+                backgroundColor: '#6366f1'
+            }]
+        },
+        options: {
+            responsive: true,
+            indexAxis: 'y',
+            scales: { x: { beginAtZero: true } }
+        }
+    });
+
+    // Calls by Contributor (Bar)
+    const contributorData = /*[[${contributorApiCalls}]]*/ {};
+    new Chart(document.getElementById('contributorChart'), {
+        type: 'bar',
+        data: {
+            labels: Object.keys(contributorData),
+            datasets: [{
+                label: 'Total Calls',
+                data: Object.values(contributorData),
+                backgroundColor: ['#8b5cf6', '#ec4899', '#06b6d4', '#f59e0b', '#22c55e']
+            }]
+        },
+        options: {
+            responsive: true,
+            indexAxis: 'y',
+            scales: { x: { beginAtZero: true } }
+        }
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error - PetShop Dev Portal</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="error-page">
+<section class="card error-box">
+    <h1>Something went wrong</h1>
+    <p class="subtitle">The request could not be completed.</p>
+
+    <p><strong>Status:</strong> <span th:text="${status}">500</span></p>
+    <p><strong>Error:</strong> <span th:text="${error}">Internal Server Error</span></p>
+    <p><strong>Message:</strong> <span th:text="${message}">Unexpected error</span></p>
+    <p><strong>Path:</strong> <span class="code" th:text="${path}">/</span></p>
+
+    <div style="margin-top: 14px;">
+        <a th:href="@{/contributors}" class="btn-primary">Go to Contributors</a>
+        <a th:href="@{/login}" class="btn-secondary">Go to Login</a>
+    </div>
+</section>
+</body>
+</html>

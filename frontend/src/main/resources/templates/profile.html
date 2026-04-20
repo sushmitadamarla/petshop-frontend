@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - PetShop Dev Portal</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .btn-locked {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            background: #e9ecef;
+            color: #adb5bd;
+            cursor: not-allowed;
+            border: 1px solid #dee2e6;
+            text-decoration: none;
+        }
+        .role-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+        .role-admin { background: #d4edda; color: #155724; }
+        .role-user  { background: #fff3cd; color: #856404; }
+        .access-note {
+            margin: 10px 0 0;
+            padding: 10px 14px;
+            background: #fff3cd;
+            border-left: 3px solid #ffc107;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-brand">&#128062; PetShop Dev Portal</div>
+    <div class="nav-user">
+        <div class="nav-links">
+            <a th:href="@{/contributors}">Contributors</a>
+            <a th:href="@{/dashboard}">Dashboard</a>
+        </div>
+        <span th:text="${session.loggedInUser.name}">User</span>
+        <!-- role pill in nav -->
+        <span th:if="${isAdmin}"  class="role-badge role-admin">Admin</span>
+        <span th:unless="${isAdmin}" class="role-badge role-user">Read-Only</span>
+        <a th:href="@{/logout}" class="btn-logout">Logout</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="breadcrumb">
+        <a th:href="@{/contributors}">Contributors</a> &gt;
+        <span th:text="${contributor.name}">Name</span>
+    </div>
+
+    <section class="card profile-header">
+        <img class="avatar" th:src="@{${contributor.profilePicUrl}}" th:alt="${contributor.name}"
+             onerror="this.src='https://ui-avatars.com/api/?name=Pet+Shop&background=1F7AE0&color=ffffff&size=120';this.onerror=null;">
+        <h1 class="profile-name" th:text="${contributor.name}">Name</h1>
+        <p class="profile-role" th:text="${contributor.role}">Role</p>
+        <p class="profile-desc" th:text="${contributor.description}">Description</p>
+    </section>
+
+    <!-- Access note for read-only users -->
+    <div class="access-note" th:unless="${isAdmin}">
+        &#128274; You are signed in as a <strong>read-only</strong> user.
+        Only <strong>GET</strong> endpoints are available to you.
+        POST and PUT buttons are disabled — log in with a team-member account to unlock them.
+    </div>
+
+    <h2 class="section-title">API Endpoints</h2>
+    <div class="table-wrap card">
+        <table class="data-table">
+            <thead>
+            <tr>
+                <th>Method</th>
+                <th>Endpoint</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="ep : ${endpoints}">
+                <td>
+                    <span th:class="${'badge badge-' + #strings.toLowerCase(ep.method)}"
+                          th:text="${ep.method}">GET</span>
+                </td>
+                <td class="endpoint-path" th:text="${ep.path}">/api/...</td>
+                <td>
+                    <!-- Admin: always show Test button -->
+                    <a th:if="${isAdmin}"
+                       th:href="@{/endpoint/{id}(id=${contributor.id},path=${ep.path},method=${ep.method})}"
+                       class="btn-test">Test Endpoint</a>
+
+                    <!-- Read-only user: GET is allowed, POST/PUT is locked -->
+                    <a th:if="${!isAdmin and ep.method == 'GET'}"
+                       th:href="@{/endpoint/{id}(id=${contributor.id},path=${ep.path},method=${ep.method})}"
+                       class="btn-test">Test Endpoint</a>
+
+                    <span th:if="${!isAdmin and ep.method != 'GET'}"
+                          class="btn-locked"
+                          title="Admin account required">&#128274; Locked</span>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(endpoints)}">
+                <td colspan="3" class="empty">No endpoints configured for this contributor.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h2 class="section-title">Recent Activity</h2>
+    <div class="table-wrap card">
+        <table class="data-table">
+            <thead>
+            <tr>
+                <th>Timestamp</th>
+                <th>Endpoint</th>
+                <th>Method</th>
+                <th>Status</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="log : ${recentActivity}">
+                <td th:text="${#temporals.format(log.calledAt, 'yyyy-MM-dd HH:mm:ss')}">2026-01-01</td>
+                <td class="endpoint-path" th:text="${log.endpoint}">/path</td>
+                <td th:text="${log.httpMethod}">GET</td>
+                <td>
+                    <span class="status-badge"
+                          th:classappend="${log.status == 'SUCCESS'} ? ' status-success' :
+                                          (${log.status == 'FAILED'} ? ' status-failed' : ' status-processing')"
+                          th:text="${log.status}">SUCCESS</span>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(recentActivity)}">
+                <td colspan="4" class="empty">No recent activity.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>
