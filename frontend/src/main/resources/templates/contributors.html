@@ -25,15 +25,4 @@
         <p class="subtitle">Team Contributors</p>
     </div>
 
-    <div class="contributor-grid">
-        <article class="card contributor-card" th:each="c : ${contributors}">
-            <img class="avatar" th:src="@{${c.profilePicUrl}}" th:alt="${c.name}" onerror="this.src='https://ui-avatars.com/api/?name=Pet+Shop&background=1F7AE0&color=ffffff&size=120';this.onerror=null;">
-            <h3 class="contributor-name" th:text="${c.name}">Name</h3>
-            <p class="contributor-role" th:text="${c.role}">Role</p>
-            <p class="contributor-desc" th:text="${c.description}">Description</p>
-            <a th:href="@{/contributors/{id}(id=${c.id})}" class="btn-view">View Profile</a>
-        </article>
-    </div>
-</div>
-</body>
-</html>
+    
