@@ -130,7 +130,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr th:each="log : ${recentActivity}">
+             <tr th:each="log : ${recentActivity}">
                 <td th:text="${#temporals.format(log.calledAt, 'yyyy-MM-dd HH:mm:ss')}">2026-01-01</td>
                 <td class="endpoint-path" th:text="${log.endpoint}">/path</td>
                 <td th:text="${log.httpMethod}">GET</td>
@@ -150,3 +150,5 @@
 </div>
 </body>
 </html>
+
+
