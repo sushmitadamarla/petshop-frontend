@@ -59,27 +59,4 @@
         <span class="status-badge" th:classappend="${statusCode >= 200 and statusCode < 400} ? ' status-success' : ' status-failed'"
               th:text="${statusCode >= 200 and statusCode < 400} ? 'SUCCESS' : 'FAILED'">SUCCESS</span>
 
-        <h2 class="section-title">Result Table</h2>
-        <div class="table-wrap" th:if="${tableRows != null and !#lists.isEmpty(tableRows)}">
-            <table class="data-table">
-                <thead>
-                <tr>
-                    <th th:each="header : ${tableHeaders}" th:text="${header}">key</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="row : ${tableRows}">
-                    <td th:each="header : ${tableHeaders}">
-                        <span th:if="${row.get(header) instanceof T(java.util.List)}" th:text="${#lists.size(row.get(header))}"></span>
-                        <span th:if="${row.get(header) instanceof T(java.util.Map)}" th:text="${row.get(header)}"></span>
-                        <span th:unless="${row.get(header) instanceof T(java.util.List) or row.get(header) instanceof T(java.util.Map)}" th:text="${row.get(header)}"></span>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-        <p class="empty" th:if="${tableRows == null or #lists.isEmpty(tableRows)}">No structured data found.</p>
-    </section>
-</div>
-</body>
-</html>
+        
