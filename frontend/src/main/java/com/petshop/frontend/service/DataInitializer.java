@@ -37,3 +37,4 @@ public class DataInitializer implements CommandLineRunner {
         contributorRepository.save(c);
     }
 }
+
