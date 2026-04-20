@@ -17,23 +17,4 @@
 
         <div th:if="${error}" class="error-message" th:text="${error}"></div>
 
-        <form th:action="@{/login}" method="post">
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" required>
-            </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-            <button type="submit" class="btn-primary">Login</button>
-        </form>
-
-        <p style="text-align:center; margin-top:16px; font-size:0.9rem; color:var(--text-muted,#666);">
-            Don't have an account?
-            <a th:href="@{/register}" style="color:var(--primary,#1F7AE0); text-decoration:none; font-weight:600;">Create one</a>
-        </p>
-    </div>
-</div>
-</body>
-</html>
+        
