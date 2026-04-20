@@ -35,4 +35,24 @@ public class ContributorController {
         return "contributors";
     }
 
-    
+    /** Profile page — pass isAdmin so Thymeleaf can hide/show Test buttons. */
+    @GetMapping("/contributors/{id}")
+    public String profile(@PathVariable Long id, HttpSession session, Model model) {
+        Contributor user = (Contributor) session.getAttribute("loggedInUser");
+        if (user == null) return "redirect:/login";
+
+        Contributor contributor = contributorService.getContributorById(id).orElse(null);
+        if (contributor == null) return "redirect:/contributors";
+
+        List<ContributorService.Endpoint> endpoints =
+                contributorService.getEndpointsForContributor(contributor.getUsername());
+        List<ApiCallLog> recentActivity = apiCallService.getRecentActivity(id, 5);
+
+        model.addAttribute("contributor", contributor);
+        model.addAttribute("endpoints", endpoints);
+        model.addAttribute("recentActivity", recentActivity);
+        model.addAttribute("isAdmin", user.isAdmin());
+        return "profile";
+    }
+}
+
