@@ -1,1 +1,140 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Endpoint Test - PetShop Dev Portal</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-brand">&#128062; PetShop Dev Portal</div>
+    <div class="nav-user">
+        <div class="nav-links">
+            <a th:href="@{/contributors}">Contributors</a>
+            <a th:href="@{/dashboard}">Dashboard</a>
+        </div>
+        <span th:text="${session.loggedInUser.name}">User</span>
+        <a th:href="@{/logout}" class="btn-logout">Logout</a>
+    </div>
+</nav>
 
+<div class="container">
+    <div class="breadcrumb">
+        <a th:href="@{/contributors}">Contributors</a> &gt;
+        <a th:href="@{/contributors/{id}(id=${contributor.id})}" th:text="${contributor.name}">Contributor</a> &gt;
+        Endpoint Test
+    </div>
+
+    <!-- ── Access denied banner (ROLE_USER trying POST/PUT) ─────────────── -->
+    <div th:if="${accessDenied}"
+         style="background:#fff3cd; border:1px solid #ffc107; border-radius:8px;
+                padding:20px 24px; margin-bottom:20px;">
+        <h2 style="color:#856404; margin:0 0 8px;">&#128274; Access Restricted</h2>
+        <p style="color:#856404; margin:0;" th:text="${accessDeniedMessage}">
+            You need an admin account to call this endpoint.
+        </p>
+        <p style="margin:12px 0 0; font-size:0.9rem; color:#666;">
+            Team-member accounts (sharvari, yatesh, sushmita, tejas, siddhant) can call
+            POST and PUT endpoints. Self-registered accounts are limited to GET requests.
+        </p>
+        <a th:href="@{/contributors/{id}(id=${contributor.id})}"
+           class="btn-secondary" style="margin-top:14px; display:inline-block;">
+            ← Back to Profile
+        </a>
+    </div>
+
+    <!-- ── Normal POST / PUT form (admin only) ──────────────────────────── -->
+    <section class="card" th:unless="${accessDenied}">
+        <div class="endpoint-header">
+            <h1>Test Endpoint</h1>
+            <span th:class="${'badge badge-' + #strings.toLowerCase(method)}" th:text="${method}">POST</span>
+        </div>
+
+        <p class="endpoint-meta">Path Template: <span class="code" th:text="${path}">/api/v1/path</span></p>
+        <p class="endpoint-meta" th:if="${resolvedPath != null}">Resolved Path:
+            <span class="code" th:text="${resolvedPath}">/api/v1/path</span></p>
+
+        <form th:action="@{/endpoint/{id}(id=${contributor.id})}" method="post">
+            <input type="hidden" name="path"   th:value="${path}">
+            <input type="hidden" name="method" th:value="${method}">
+
+            <h3 class="section-title" style="margin-top:12px;">Path Parameters</h3>
+            <div class="form-grid" th:if="${pathParams != null and !#lists.isEmpty(pathParams)}">
+                <div class="form-group" th:each="pp : ${pathParams}">
+                    <label th:for="${'path_' + pp}" th:text="${pp + ' (Path Param)'}"></label>
+                    <input type="text" th:id="${'path_' + pp}" th:name="${'path_' + pp}"
+                           th:value="${pathValues[pp]}">
+                </div>
+            </div>
+            <p class="subtitle" th:if="${pathParams == null or #lists.isEmpty(pathParams)}">No path parameters required.</p>
+
+            <h3 class="section-title" style="margin-top:12px;">Request Body</h3>
+            <div class="form-grid" th:if="${bodyFields != null and !#lists.isEmpty(bodyFields)}">
+                <div class="form-group" th:each="field : ${bodyFields}">
+                    <label th:for="${'body_' + field.key}" th:text="${field.label}"></label>
+
+                    <input th:if="${field.type == 'text'}" type="text"
+                           th:id="${'body_' + field.key}" th:name="${'body_' + field.key}"
+                           th:value="${bodyValues[field.key]}" th:placeholder="${field.placeholder}">
+
+                    <input th:if="${field.type == 'number'}" type="number" step="1"
+                           th:id="${'body_' + field.key}" th:name="${'body_' + field.key}"
+                           th:value="${bodyValues[field.key]}" th:placeholder="${field.placeholder}">
+
+                    <input th:if="${field.type == 'decimal'}" type="number" step="0.01"
+                           th:id="${'body_' + field.key}" th:name="${'body_' + field.key}"
+                           th:value="${bodyValues[field.key]}" th:placeholder="${field.placeholder}">
+
+                    <select th:if="${field.type == 'boolean'}"
+                            th:id="${'body_' + field.key}" th:name="${'body_' + field.key}">
+                        <option value="">Select</option>
+                        <option value="true"  th:selected="${bodyValues[field.key] == 'true'}">true</option>
+                        <option value="false" th:selected="${bodyValues[field.key] == 'false'}">false</option>
+                    </select>
+
+                    <select th:if="${field.type == 'status'}"
+                            th:id="${'body_' + field.key}" th:name="${'body_' + field.key}">
+                        <option value="">Select Status</option>
+                        <option value="Success" th:selected="${bodyValues[field.key] == 'Success'}">Success</option>
+                        <option value="Failed"  th:selected="${bodyValues[field.key] == 'Failed'}">Failed</option>
+                    </select>
+                </div>
+            </div>
+            <p class="subtitle" th:if="${bodyFields == null or #lists.isEmpty(bodyFields)}">
+                This endpoint does not require a request body.</p>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">Execute Request</button>
+                <a th:href="@{/contributors/{id}(id=${contributor.id})}" class="btn-secondary">Back to Profile</a>
+            </div>
+        </form>
+    </section>
+
+    <!-- ── Response table ───────────────────────────────────────────────── -->
+    <section class="card" th:if="${statusCode != null}" style="margin-top:18px;">
+        <p class="status-line">Status Code: <span th:text="${statusCode}">200</span></p>
+        <span class="status-badge"
+              th:classappend="${statusCode >= 200 and statusCode < 400} ? ' status-success' : ' status-failed'"
+              th:text="${statusCode >= 200 and statusCode < 400} ? 'SUCCESS' : 'FAILED'">SUCCESS</span>
+
+        <h2 class="section-title">Result Table</h2>
+        <div class="table-wrap" th:if="${tableRows != null and !#lists.isEmpty(tableRows)}">
+            <table class="data-table">
+                <thead>
+                <tr>
+                    <th th:each="header : ${tableHeaders}" th:text="${header}">key</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="row : ${tableRows}">
+                    <td th:each="header : ${tableHeaders}" th:text="${row.get(header)}">value</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <p class="empty" th:if="${tableRows == null or #lists.isEmpty(tableRows)}">No structured data returned.</p>
+    </section>
+</div>
+</body>
+</html>
